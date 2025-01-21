@@ -7,6 +7,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader
 from io import BytesIO
 from pypdf import PdfReader
+from langchain.schema import Document  # Import the Document class
 
 # Load environment variables
 load_dotenv()
@@ -59,17 +60,17 @@ class DocumentRetreiveSystem:
         reader = PdfReader(pdf_file)
         documents = []
 
-        # Extract text from each page and create documents
+        # Extract text from each page and create Document objects
         for page_num, page in enumerate(reader.pages):
             text = page.extract_text()
             if text:
-                documents.append({
-                    "page_content": text,
-                    "metadata": {
+                documents.append(Document(
+                    page_content=text,
+                    metadata={
                         "source": file_name,
                         "page": page_num + 1
                     }
-                })
+                ))
 
         # Split documents
         return text_splitter.split_documents(documents)
