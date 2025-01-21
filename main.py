@@ -11,6 +11,7 @@ from langchain.prompts import ChatPromptTemplate
 
 load_dotenv()
 app = FastAPI()
+PORT=os.getenv("PORT"),
 doc_system = DocumentRetreiveSystem()
 
 # Enable CORS
@@ -134,4 +135,4 @@ async def answer_user_query(request: Request):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=PORT)
