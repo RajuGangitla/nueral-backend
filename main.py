@@ -54,26 +54,21 @@ async def upload_document(file: UploadFile):
         raise HTTPException(status_code=400, detail="Only PDF files are supported")
     
     try:
-         # Save the uploaded file temporarily
-        temp_file_path = f"temp_{file.filename}"
-        with open(temp_file_path, "wb") as buffer:
-            content = await file.read()
-            buffer.write(content)
+        # Read the file content directly into memory
+        content = await file.read()
         
         # Process the document
-        documents = await doc_system.load_and_split_documents(temp_file_path, file.filename)
+        documents = await doc_system.load_and_split_documents(content, file.filename)
         num_chunks = await doc_system.insert_documents(documents)
 
-        os.remove(temp_file_path)
         
         return {
             "message": f"Successfully processed {file.filename}",
             "chunks": num_chunks
         }        
     except Exception as e:
-        if os.path.exists(temp_file_path):
-            os.remove(temp_file_path)
         raise HTTPException(status_code=500, detail=str(e))
+
     
 
 def create_context_from_docs(processed_results: List[dict]) -> str:

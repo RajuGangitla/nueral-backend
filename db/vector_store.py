@@ -5,6 +5,8 @@ from langchain_pinecone import PineconeVectorStore
 from langchain_openai import AzureOpenAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader
+from io import BytesIO
+from pypdf import PdfReader
 
 # Load environment variables
 load_dotenv()
@@ -37,13 +39,13 @@ class DocumentRetreiveSystem:
             openai_api_key=self.azure_api_key
         )
 
-    async def load_and_split_documents(self, file_path: str, file_name: str):
+    async def load_and_split_documents(self, file_content: bytes, file_name: str):
         """
-        Loads and splits the documents into chunks.
+        Loads and splits the documents into chunks directly from in-memory file content.
         
         Args:
-            file_path (str): Path to the temporary file
-            file_name (str): Original filename for metadata
+            file_content (bytes): The content of the file as bytes.
+            file_name (str): Original filename for metadata.
         """
         text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=self.text_chunk_size,
@@ -52,14 +54,23 @@ class DocumentRetreiveSystem:
             length_function=len
         )
 
-        # Load and process the PDF
-        loader = PyPDFLoader(file_path)
-        documents = loader.load()
-        
-        # Add source metadata
-        for doc in documents:
-            doc.metadata["source"] = file_name
-        
+        # Load and process the PDF from in-memory bytes
+        pdf_file = BytesIO(file_content)
+        reader = PdfReader(pdf_file)
+        documents = []
+
+        # Extract text from each page and create documents
+        for page_num, page in enumerate(reader.pages):
+            text = page.extract_text()
+            if text:
+                documents.append({
+                    "page_content": text,
+                    "metadata": {
+                        "source": file_name,
+                        "page": page_num + 1
+                    }
+                })
+
         # Split documents
         return text_splitter.split_documents(documents)
 
