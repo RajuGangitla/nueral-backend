@@ -2,7 +2,6 @@ import os
 from typing import List
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, File, HTTPException, Request, Response, UploadFile
-from fastapi.responses import JSONResponse
 from langchain_openai import AzureOpenAIEmbeddings, AzureChatOpenAI
 from dotenv import load_dotenv
 from db.vector_store import DocumentRetreiveSystem
