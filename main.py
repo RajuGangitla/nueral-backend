@@ -118,8 +118,7 @@ async def answer_user_query(request: Request):
         # Create prompt template
         prompt = ChatPromptTemplate.from_messages([
             ("system", """You are a helpful AI assistant. Use the following context to answer the user's question. 
-            If you cannot find the answer in the context, say so clearly. Always base your answer on the provided context.
-            
+                If the context is provided, base your answer on it. If the context is empty or irrelevant, respond in a helpful and informative way based on your general knowledge.            
             Context: {context}"""),
             ("human", "{question}")
         ])
